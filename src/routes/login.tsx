@@ -21,7 +21,7 @@ function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isAuthed) navigate({ to: "/dashboard" });
+    if (isAuthed) navigate({ to: "/dashboard" as any });
   }, [isAuthed, navigate]);
 
   const onSubmit = (e: React.FormEvent) => {
@@ -36,7 +36,7 @@ function LoginPage() {
       setLoading(false);
       if (ok) {
         toast.success("Welcome back, Admin");
-        navigate({ to: "/dashboard" });
+        navigate({ to: "/dashboard" as any });
       } else {
         toast.error("Invalid credentials. Try admin / admin123");
       }
