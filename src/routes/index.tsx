@@ -10,7 +10,7 @@ function Index() {
   const navigate = useNavigate();
   const { isAuthed } = useApp();
   useEffect(() => {
-    navigate({ to: isAuthed ? "/dashboard" : "/login" });
+    navigate({ to: (isAuthed ? "/dashboard" : "/login") as any });
   }, [isAuthed, navigate]);
   return null;
 }
