@@ -1,12 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell, PageHeader } from "@/components/AppShell";
 import { useApp } from "@/lib/store";
+import { computeFoodStats } from "@/lib/selectors";
+import { DemoSimulationPanel } from "@/components/DemoSimulationPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
   Users, UserCheck, UserX, Utensils, CloudRain, Sun, Smartphone,
-  Activity, TrendingUp, Wifi, Database, Clock, Shield,
+  Activity, TrendingUp, Wifi, Database, Clock, Shield, Flame, UtensilsCrossed, Leaf,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMemo, useState, useEffect } from "react";
@@ -17,7 +19,20 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 function DashboardPage() {
-  const { students, attendance, currentSessionId, rainDetected, servoActive, arduinoConnected, firebaseSync, lastDataReceived } = useApp();
+  const {
+    students,
+    attendance,
+    currentSessionId,
+    rainDetected,
+    servoActive,
+    arduinoConnected,
+    firebaseSync,
+    lastDataReceived,
+    foodPreferences,
+    gasStatus,
+    emergencyActive,
+    gasLogs,
+  } = useApp();
   const [, force] = useState(0);
   useEffect(() => { const i = setInterval(() => force((x) => x + 1), 1000); return () => clearInterval(i); }, []);
 
@@ -28,10 +43,11 @@ function DashboardPage() {
   const total = students.length;
   const present = presentIds.size;
   const absent = total - present;
-  const foodRequired = present;
-  const prepared = Math.max(total, present + 2);
-  const consumed = present;
-  const saved = Math.max(0, prepared - consumed);
+  const food = computeFoodStats(students, attendance, currentSessionId, foodPreferences);
+  const foodRequired = food.foodRequired;
+  const prepared = food.prepared;
+  const consumed = food.consumed;
+  const saved = food.saved;
   const wastePct = prepared > 0 ? Math.round((saved / prepared) * 100) : 0;
   const attendancePct = total > 0 ? Math.round((present / total) * 100) : 0;
 
@@ -39,7 +55,7 @@ function DashboardPage() {
   const secondsAgo = Math.floor((Date.now() - lastDataReceived) / 1000);
 
   return (
-    <div className="p-4 md:p-8 max-w-[1500px] mx-auto">
+    <div className={cn("p-4 md:p-8 max-w-[1500px] mx-auto", emergencyActive && "relative")}>
       <PageHeader
         title="Control Center"
         subtitle="Live overview of campus IoT systems"
@@ -55,7 +71,15 @@ function DashboardPage() {
         <StatCard icon={Users} label="Total Students" value={total} accent="primary" />
         <StatCard icon={UserCheck} label="Present" value={present} sub={`${attendancePct}%`} accent="success" />
         <StatCard icon={UserX} label="Absent" value={absent} accent="destructive" />
-        <StatCard icon={Utensils} label="Food Required" value={foodRequired} sub="meals" accent="warning" />
+        <StatCard icon={Utensils} label="Food Required" value={foodRequired} sub="will eat" accent="warning" />
+        <StatCard icon={UtensilsCrossed} label="Opted Out" value={food.notEating} sub="not eating" accent="destructive" />
+      </div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
+        <StatCard icon={Leaf} label="Food Saved" value={food.optOutSaved} sub="opt-out meals" accent="success" />
+        <StatCard icon={TrendingUp} label="Participation" value={`${food.participationRate}%`} accent="primary" />
+        <StatCard icon={Flame} label="Gas Sensor" value={gasStatus.toUpperCase()} accent={gasStatus === "safe" ? "success" : "destructive"} />
+        <StatCard icon={Shield} label="Waste Prevented" value={food.wastePrevented} sub="meals" accent="success" />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-4 md:gap-6 mb-6">
@@ -68,9 +92,9 @@ function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <FoodTile label="Breakfast" value={present} />
-              <FoodTile label="Lunch" value={present} />
-              <FoodTile label="Dinner" value={present} />
+              <FoodTile label="Eating" value={food.eating} />
+              <FoodTile label="Not Eating" value={food.notEating} />
+              <FoodTile label="Food Required" value={foodRequired} />
               <FoodTile label="Total Prepared" value={prepared} />
             </div>
             <div className="mt-5 space-y-3">
@@ -116,6 +140,23 @@ function DashboardPage() {
                   Servo {servoActive ? "ACTIVE" : "IDLE"}
                 </Badge>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card className={cn("shadow-card", emergencyActive && "border-destructive")}>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Flame className="h-4 w-4 text-destructive" /> Gas & Emergency
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Badge className={gasStatus === "safe" ? "bg-success" : "bg-destructive"}>{gasStatus}</Badge>
+              {emergencyActive && <p className="text-xs text-destructive font-medium animate-pulse">Emergency active</p>}
+              <ul className="text-xs space-y-1 max-h-24 overflow-y-auto">
+                {gasLogs.slice(0, 3).map((g) => (
+                  <li key={g.id} className="text-muted-foreground truncate">{g.message}</li>
+                ))}
+              </ul>
             </CardContent>
           </Card>
 
@@ -188,6 +229,10 @@ function DashboardPage() {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      <div className="mt-6">
+        <DemoSimulationPanel />
       </div>
     </div>
   );

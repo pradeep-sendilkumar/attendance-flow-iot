@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useApp } from "@/lib/store";
 import { Button } from "@/components/ui/button";
@@ -14,15 +14,16 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
-  const { login, isAuthed } = useApp();
+  const { login, isAuthed, role } = useApp();
   const navigate = useNavigate();
   const [username, setUsername] = useState("admin");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isAuthed) navigate({ to: "/dashboard" as any });
-  }, [isAuthed, navigate]);
+    if (isAuthed && role === "admin") navigate({ to: "/dashboard" });
+    if (isAuthed && role === "student") navigate({ to: "/student-dashboard" });
+  }, [isAuthed, role, navigate]);
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +37,7 @@ function LoginPage() {
       setLoading(false);
       if (ok) {
         toast.success("Welcome back, Admin");
-        navigate({ to: "/dashboard" as any });
+        navigate({ to: "/dashboard" });
       } else {
         toast.error("Invalid credentials. Try admin / admin123");
       }
@@ -105,6 +106,11 @@ function LoginPage() {
           <div className="mt-6 p-3 rounded-lg bg-muted text-xs text-muted-foreground">
             <span className="font-medium text-foreground">Demo credentials:</span> admin / admin123
           </div>
+          <p className="mt-4 text-center text-sm">
+            <Link to="/student-login" className="text-primary hover:underline">
+              Student login →
+            </Link>
+          </p>
         </div>
       </div>
     </div>

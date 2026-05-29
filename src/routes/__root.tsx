@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { AppProvider } from "@/lib/store";
+import { EmergencyOverlay } from "@/components/EmergencyOverlay";
 
 import appCss from "../styles.css?url";
 import logoUrl from "../assets/logo.png";
@@ -73,6 +74,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AppProvider>
         <Outlet />
+        <EmergencyOverlay />
         <Toaster position="top-right" richColors />
       </AppProvider>
     </QueryClientProvider>

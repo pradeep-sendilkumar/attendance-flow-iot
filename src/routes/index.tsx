@@ -8,9 +8,11 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const navigate = useNavigate();
-  const { isAuthed } = useApp();
+  const { isAuthed, role } = useApp();
   useEffect(() => {
-    navigate({ to: (isAuthed ? "/dashboard" : "/login") as any });
-  }, [isAuthed, navigate]);
+    if (!isAuthed) navigate({ to: "/login" });
+    else if (role === "student") navigate({ to: "/student-dashboard" });
+    else navigate({ to: "/dashboard" });
+  }, [isAuthed, role, navigate]);
   return null;
 }

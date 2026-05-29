@@ -23,7 +23,15 @@ function StudentsPage() {
   const [query, setQuery] = useState("");
   const [historyFor, setHistoryFor] = useState<string | null>(null);
 
-  const [form, setForm] = useState({ name: "", rfid: "", className: "", parentPhone: "" });
+  const [form, setForm] = useState({
+    name: "",
+    rfid: "",
+    className: "",
+    parentPhone: "",
+    email: "",
+    password: "student123",
+    roomNumber: "",
+  });
 
   const filtered = useMemo(
     () => students.filter((s) =>
@@ -42,9 +50,18 @@ function StudentsPage() {
       toast.error("RFID already exists");
       return;
     }
-    addStudent({ name: form.name.trim(), rfid: form.rfid.trim(), className: form.className.trim(), parentPhone: form.parentPhone.trim() });
-    toast.success(`${form.name} added`);
-    setForm({ name: "", rfid: "", className: "", parentPhone: "" });
+    const slug = form.name.trim().toLowerCase().split(" ")[0] || "student";
+    addStudent({
+      name: form.name.trim(),
+      rfid: form.rfid.trim(),
+      className: form.className.trim(),
+      parentPhone: form.parentPhone.trim(),
+      email: form.email.trim() || `${slug}@campus.edu`,
+      password: form.password.trim() || "student123",
+      roomNumber: form.roomNumber.trim() || `R-${form.rfid.slice(-3)}`,
+    });
+    toast.success(`${form.name} added — student can login with email/RFID`);
+    setForm({ name: "", rfid: "", className: "", parentPhone: "", email: "", password: "student123", roomNumber: "" });
     setOpen(false);
   };
 
@@ -70,6 +87,9 @@ function StudentsPage() {
                 <div><Label>RFID ID</Label><Input value={form.rfid} onChange={(e) => setForm({ ...form, rfid: e.target.value })} placeholder="e.g. RFID009" /></div>
                 <div><Label>Class</Label><Input value={form.className} onChange={(e) => setForm({ ...form, className: e.target.value })} placeholder="e.g. 10-A" /></div>
                 <div><Label>Parent Phone (optional)</Label><Input value={form.parentPhone} onChange={(e) => setForm({ ...form, parentPhone: e.target.value })} placeholder="+91 ..." /></div>
+                <div><Label>Email</Label><Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="student@campus.edu" /></div>
+                <div><Label>Room</Label><Input value={form.roomNumber} onChange={(e) => setForm({ ...form, roomNumber: e.target.value })} placeholder="A-101" /></div>
+                <div><Label>Password</Label><Input value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} /></div>
                 <DialogFooter>
                   <Button type="submit" className="bg-gradient-eco">Register Student</Button>
                 </DialogFooter>

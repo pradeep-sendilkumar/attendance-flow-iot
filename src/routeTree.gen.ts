@@ -10,8 +10,13 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StudentsRouteImport } from './routes/students'
+import { Route as StudentLoginRouteImport } from './routes/student-login'
+import { Route as StudentFoodRouteImport } from './routes/student-food'
+import { Route as StudentDashboardRouteImport } from './routes/student-dashboard'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as GasMonitoringRouteImport } from './routes/gas-monitoring'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ComplaintsRouteImport } from './routes/complaints'
 import { Route as AttendanceRouteImport } from './routes/attendance'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
@@ -21,14 +26,39 @@ const StudentsRoute = StudentsRouteImport.update({
   path: '/students',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudentLoginRoute = StudentLoginRouteImport.update({
+  id: '/student-login',
+  path: '/student-login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudentFoodRoute = StudentFoodRouteImport.update({
+  id: '/student-food',
+  path: '/student-food',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudentDashboardRoute = StudentDashboardRouteImport.update({
+  id: '/student-dashboard',
+  path: '/student-dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GasMonitoringRoute = GasMonitoringRouteImport.update({
+  id: '/gas-monitoring',
+  path: '/gas-monitoring',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComplaintsRoute = ComplaintsRouteImport.update({
+  id: '/complaints',
+  path: '/complaints',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AttendanceRoute = AttendanceRouteImport.update({
@@ -51,16 +81,26 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/attendance': typeof AttendanceRoute
+  '/complaints': typeof ComplaintsRoute
   '/dashboard': typeof DashboardRoute
+  '/gas-monitoring': typeof GasMonitoringRoute
   '/login': typeof LoginRoute
+  '/student-dashboard': typeof StudentDashboardRoute
+  '/student-food': typeof StudentFoodRoute
+  '/student-login': typeof StudentLoginRoute
   '/students': typeof StudentsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/attendance': typeof AttendanceRoute
+  '/complaints': typeof ComplaintsRoute
   '/dashboard': typeof DashboardRoute
+  '/gas-monitoring': typeof GasMonitoringRoute
   '/login': typeof LoginRoute
+  '/student-dashboard': typeof StudentDashboardRoute
+  '/student-food': typeof StudentFoodRoute
+  '/student-login': typeof StudentLoginRoute
   '/students': typeof StudentsRoute
 }
 export interface FileRoutesById {
@@ -68,8 +108,13 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/attendance': typeof AttendanceRoute
+  '/complaints': typeof ComplaintsRoute
   '/dashboard': typeof DashboardRoute
+  '/gas-monitoring': typeof GasMonitoringRoute
   '/login': typeof LoginRoute
+  '/student-dashboard': typeof StudentDashboardRoute
+  '/student-food': typeof StudentFoodRoute
+  '/student-login': typeof StudentLoginRoute
   '/students': typeof StudentsRoute
 }
 export interface FileRouteTypes {
@@ -78,18 +123,39 @@ export interface FileRouteTypes {
     | '/'
     | '/analytics'
     | '/attendance'
+    | '/complaints'
     | '/dashboard'
+    | '/gas-monitoring'
     | '/login'
+    | '/student-dashboard'
+    | '/student-food'
+    | '/student-login'
     | '/students'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/analytics' | '/attendance' | '/dashboard' | '/login' | '/students'
+  to:
+    | '/'
+    | '/analytics'
+    | '/attendance'
+    | '/complaints'
+    | '/dashboard'
+    | '/gas-monitoring'
+    | '/login'
+    | '/student-dashboard'
+    | '/student-food'
+    | '/student-login'
+    | '/students'
   id:
     | '__root__'
     | '/'
     | '/analytics'
     | '/attendance'
+    | '/complaints'
     | '/dashboard'
+    | '/gas-monitoring'
     | '/login'
+    | '/student-dashboard'
+    | '/student-food'
+    | '/student-login'
     | '/students'
   fileRoutesById: FileRoutesById
 }
@@ -97,8 +163,13 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalyticsRoute: typeof AnalyticsRoute
   AttendanceRoute: typeof AttendanceRoute
+  ComplaintsRoute: typeof ComplaintsRoute
   DashboardRoute: typeof DashboardRoute
+  GasMonitoringRoute: typeof GasMonitoringRoute
   LoginRoute: typeof LoginRoute
+  StudentDashboardRoute: typeof StudentDashboardRoute
+  StudentFoodRoute: typeof StudentFoodRoute
+  StudentLoginRoute: typeof StudentLoginRoute
   StudentsRoute: typeof StudentsRoute
 }
 
@@ -111,6 +182,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/student-login': {
+      id: '/student-login'
+      path: '/student-login'
+      fullPath: '/student-login'
+      preLoaderRoute: typeof StudentLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/student-food': {
+      id: '/student-food'
+      path: '/student-food'
+      fullPath: '/student-food'
+      preLoaderRoute: typeof StudentFoodRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/student-dashboard': {
+      id: '/student-dashboard'
+      path: '/student-dashboard'
+      fullPath: '/student-dashboard'
+      preLoaderRoute: typeof StudentDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -118,11 +210,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/gas-monitoring': {
+      id: '/gas-monitoring'
+      path: '/gas-monitoring'
+      fullPath: '/gas-monitoring'
+      preLoaderRoute: typeof GasMonitoringRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/complaints': {
+      id: '/complaints'
+      path: '/complaints'
+      fullPath: '/complaints'
+      preLoaderRoute: typeof ComplaintsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/attendance': {
@@ -153,8 +259,13 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalyticsRoute: AnalyticsRoute,
   AttendanceRoute: AttendanceRoute,
+  ComplaintsRoute: ComplaintsRoute,
   DashboardRoute: DashboardRoute,
+  GasMonitoringRoute: GasMonitoringRoute,
   LoginRoute: LoginRoute,
+  StudentDashboardRoute: StudentDashboardRoute,
+  StudentFoodRoute: StudentFoodRoute,
+  StudentLoginRoute: StudentLoginRoute,
   StudentsRoute: StudentsRoute,
 }
 export const routeTree = rootRouteImport

@@ -10,7 +10,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
-import { Radio, CloudRain, Zap, StopCircle, Smartphone } from "lucide-react";
+import { Radio, CloudRain, Zap, StopCircle, Smartphone, Play } from "lucide-react";
+import { computeFoodStats, getFoodPreference } from "@/lib/selectors";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/attendance")({
@@ -19,7 +20,21 @@ export const Route = createFileRoute("/attendance")({
 });
 
 function AttendancePage() {
-  const { students, attendance, currentSessionId, scanRfid, setRain, rainDetected, endSession } = useApp();
+  const {
+    students,
+    attendance,
+    currentSessionId,
+    scanRfid,
+    setRain,
+    rainDetected,
+    endSession,
+    startNewSession,
+    sessionActive,
+    sessionFinalized,
+    foodPreferences,
+    setFoodPreference,
+    canEditFoodPreference,
+  } = useApp();
   const [rfidInput, setRfidInput] = useState("");
   const [pickStudent, setPickStudent] = useState("");
 
@@ -43,11 +58,15 @@ function AttendancePage() {
     setRfidInput("");
   };
 
+  const food = computeFoodStats(students, attendance, currentSessionId, foodPreferences);
+
   const handleEnd = () => {
     const session = endSession();
     if (session) {
       toast.success(`Session ended • ${session.presentCount} present, ${students.length - session.presentCount} absent`);
-      toast.info(`Food saved: ${session.saved} meals (${session.wastePercent}% waste)`);
+      toast.info(
+        `Food: ${session.eatingCount} eating, ${session.notEatingCount} opted out • ${session.saved} meals saved`,
+      );
     }
   };
 
@@ -57,9 +76,16 @@ function AttendancePage() {
         title="Live Attendance"
         subtitle={`Session: ${currentSessionId.slice(-10)} • ${presentIds.size} of ${students.length} present`}
         actions={
-          <Button variant="destructive" onClick={handleEnd}>
-            <StopCircle className="h-4 w-4 mr-1" /> End Session
-          </Button>
+          <div className="flex gap-2">
+            {(!sessionActive || sessionFinalized) && (
+              <Button variant="outline" onClick={() => { startNewSession(); toast.success("New session started"); }}>
+                <Play className="h-4 w-4 mr-1" /> New Session
+              </Button>
+            )}
+            <Button variant="destructive" onClick={handleEnd} disabled={sessionFinalized}>
+              <StopCircle className="h-4 w-4 mr-1" /> End Session
+            </Button>
+          </div>
         }
       />
 
@@ -101,7 +127,10 @@ function AttendancePage() {
             </div>
 
             <p className="text-xs text-muted-foreground">
-              💡 Demo mode • In production, Arduino sends RFID over serial → Firebase → this dashboard.
+              Food required: <strong>{food.foodRequired}</strong> (present & will eat) • Opt-out: {food.notEating}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Demo • Arduino RFID → Firebase → dashboard
             </p>
           </CardContent>
         </Card>
@@ -142,11 +171,15 @@ function AttendancePage() {
                   <TableHead>RFID ID</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Timestamp</TableHead>
+                  <TableHead>Food</TableHead>
                   <TableHead className="hidden md:table-cell">SMS</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rows.map(({ student, status, timestamp, smsSent }) => (
+                {rows.map(({ student, status, timestamp, smsSent }) => {
+                  const pref = getFoodPreference(student.id, foodPreferences);
+                  const canEdit = canEditFoodPreference() && status === "present";
+                  return (
                   <TableRow key={student.id} className={status === "present" ? "bg-success/5" : ""}>
                     <TableCell className="font-medium">{student.name}</TableCell>
                     <TableCell><code className="text-xs bg-muted px-2 py-1 rounded">{student.rfid}</code></TableCell>
@@ -162,6 +195,32 @@ function AttendancePage() {
                     <TableCell className="text-sm text-muted-foreground">
                       {timestamp ? new Date(timestamp).toLocaleTimeString() : "—"}
                     </TableCell>
+                    <TableCell>
+                      {status === "present" ? (
+                        <div className="flex gap-1">
+                          <Button
+                            size="sm"
+                            variant={pref === "eating" ? "default" : "outline"}
+                            className="h-7 text-[10px] px-2"
+                            disabled={!canEdit}
+                            onClick={() => setFoodPreference(student.id, "eating")}
+                          >
+                            Eat
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant={pref === "not_eating" ? "destructive" : "outline"}
+                            className="h-7 text-[10px] px-2"
+                            disabled={!canEdit}
+                            onClick={() => setFoodPreference(student.id, "not_eating")}
+                          >
+                            Skip
+                          </Button>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
                     <TableCell className="hidden md:table-cell">
                       {smsSent ? (
                         <span className="inline-flex items-center gap-1 text-xs text-primary">
@@ -170,7 +229,7 @@ function AttendancePage() {
                       ) : <span className="text-muted-foreground text-xs">—</span>}
                     </TableCell>
                   </TableRow>
-                ))}
+                );})}
               </TableBody>
             </Table>
           </div>

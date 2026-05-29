@@ -30,12 +30,20 @@ function AnalyticsPage() {
     Prepared: f.totalPrepared,
     Consumed: f.consumed,
     Saved: f.saved,
+    Eating: f.eatingCount ?? f.consumed,
+    "Not Eating": f.notEatingCount ?? 0,
+    "Opt-Out Saved": f.optOutSaved ?? 0,
+    Participation: f.participationRate ?? 0,
   }));
 
   const avgAttendance = trend.length
     ? Math.round(trend.reduce((s, t) => s + t.Attendance, 0) / trend.length)
     : 0;
   const totalSaved = foodHistory.reduce((s, f) => s + f.saved, 0);
+  const totalOptOut = foodHistory.reduce((s, f) => s + (f.optOutSaved ?? f.notEatingCount ?? 0), 0);
+  const avgParticipation = foodHistory.length
+    ? Math.round(foodHistory.reduce((s, f) => s + (f.participationRate ?? 0), 0) / foodHistory.length)
+    : 0;
   const totalPrepared = foodHistory.reduce((s, f) => s + f.totalPrepared, 0);
   const avgWaste = foodHistory.length
     ? Math.round(foodHistory.reduce((s, f) => s + f.wastePercent, 0) / foodHistory.length)
@@ -51,10 +59,12 @@ function AnalyticsPage() {
     <div className="p-4 md:p-8 max-w-[1500px] mx-auto">
       <PageHeader title="Analytics" subtitle="Performance trends & food optimization insights" />
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 md:gap-4 mb-6">
         <SummaryCard icon={TrendingUp} label="Avg Attendance" value={`${avgAttendance}%`} accent="primary" />
         <SummaryCard icon={Utensils} label="Meals Prepared" value={totalPrepared} accent="warning" />
         <SummaryCard icon={Leaf} label="Meals Saved" value={totalSaved} accent="success" />
+        <SummaryCard icon={Award} label="Opt-Out Saved" value={totalOptOut} accent="success" />
+        <SummaryCard icon={TrendingUp} label="Participation" value={`${avgParticipation}%`} accent="primary" />
         <SummaryCard icon={Award} label="Avg Waste" value={`${avgWaste}%`} accent={avgWaste > 20 ? "destructive" : "success"} />
       </div>
 
@@ -92,6 +102,39 @@ function AnalyticsPage() {
                 <Legend wrapperStyle={{ fontSize: 12 }} />
                 <Bar dataKey="Present" fill="oklch(0.65 0.18 145)" radius={[6, 6, 0, 0]} />
                 <Bar dataKey="Absent" fill="oklch(0.6 0.22 25)" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-4 md:gap-6 mb-6">
+        <Card className="shadow-card">
+          <CardHeader><CardTitle className="text-base">Daily Food Participation %</CardTitle></CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={240}>
+              <AreaChart data={foodChart}>
+                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0.01 240)" />
+                <XAxis dataKey="date" fontSize={12} />
+                <YAxis fontSize={12} domain={[0, 100]} />
+                <Tooltip />
+                <Area type="monotone" dataKey="Participation" stroke="oklch(0.65 0.18 145)" fill="oklch(0.65 0.18 145 / 0.3)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+        <Card className="shadow-card">
+          <CardHeader><CardTitle className="text-base">Eating vs Not Eating</CardTitle></CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={foodChart}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" fontSize={12} />
+                <YAxis fontSize={12} />
+                <Tooltip />
+                <Legend wrapperStyle={{ fontSize: 12 }} />
+                <Bar dataKey="Eating" fill="oklch(0.65 0.18 145)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="Not Eating" fill="oklch(0.6 0.22 25)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
